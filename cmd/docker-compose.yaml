@@ -1,0 +1,43 @@
+version: '3.3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    networks:
+        - aig
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+        - aig
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:7.10.1
+    ports:
+      - 8200:8200
+    command: >
+       apm-server -e
+         -E apm-server.rum.enabled=true
+    networks:
+        - aig
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:7.10.1
+    networks:
+        - aig
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.10.1
+    networks:
+        - aig
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.10.1
+    networks:
+        - aig
+networks:
+    aig:
+        driver: bridge

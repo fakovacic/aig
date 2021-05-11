@@ -1,0 +1,118 @@
+{{define "meta"}}
+
+{{ $filtersValues := .FiltersValues }}
+
+<form class="col-12 row list-control" action="" type="get">
+    <input type="hidden" id="page" name="page" value="{{ .Page }}">
+    <input type="hidden" id="limit.value.current" value="{{ .Limit }}">
+    <input type="hidden" id="sort.field.current" value="{{ .Sort.Field }}">
+    <input type="hidden" id="sort.value.current" value="{{ .Sort.Value }}">
+
+    <div class="d-flex">
+        <div class="text-muted">
+            <strong>{{i18 "meta" "show"}}</strong>
+            <div class="mx-2 d-inline-block" data-children-count="1">
+                <select id="limit.value" name="limit" class="form-control form-control-sm"
+                    onchange="this.form.submit()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </div>
+            {{i18 "meta" "of"}}
+            <span>{{ .Count }}</span>
+
+            <strong style="margin-left: 10px;">{{i18 "meta" "sort"}}</strong>
+            <div class="ml-2 d-inline-block" data-children-count="1">
+                <select id="sort.field" name="sort.field" class="form-control form-control-sm">
+                    {{ range $key, $value := .SortFields }}
+                    <option value="{{ $key }}">{{ $value }}</option>
+                    {{ end }}
+                </select>
+            </div>
+            <div class="ml-2 d-inline-block" data-children-count="2">
+                <select id="sort.value" name="sort.value" class="form-control form-control-sm">
+                    <option value="ASC">
+                        {{i18 "meta" "asc"}}
+                    </option>
+                    <option value="DESC">
+                        {{i18 "meta" "desc"}}
+                    </option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-sm m-1" data-toggle="modal" data-target="#listFilters">
+                {{i18 "meta" "filters"}}
+            </button>
+            <button type="submit" class="btn btn-sm btn-light m-1" name="search" value="true">
+                {{i18 "meta" "show"}}
+            </button>
+        </div>
+        <div class="ml-auto d-flex align-items-center">
+            <ul class="pagination m-0 ml-auto">
+                <li class="page-item">
+                    <input type="submit" class="page-link" name="pager" value='{{i18 "meta" "prev"}}'>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">
+                        {{ .Page }} of {{ .Pages }}
+                    </a>
+                </li>
+                <li class="page-item">
+                    <input type="submit" class="page-link" name="pager" value='{{i18 "meta" "next"}}'>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="modal fade" id="listFilters" tabindex="-1" role="dialog" aria-labelledby="updateLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLabel">
+                        {{i18 "meta" "filters"}}
+                    </h5>
+                    <button type="button" class="btn btn-sm close" data-dismiss="modal"
+                        aria-label='{{i18 "meta" "close"}}'>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ range $key, $value := .FilterFields }}
+                    <div class="form-group">
+                        <label for="filters.{{$key}}">{{$value}}</label>
+                        <input id="filters.{{$key}}" name="filters.{{$key}}" type="text" class="form-control"
+                            value="{{index $filtersValues $key}}">
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        {{i18 "meta" "close"}}
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        {{i18 "meta" "submit"}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#sort.field").val(
+                $("#sort.field.current").val()
+            );
+            $("#sort.value").val(
+                $("#sort.value.current").val()
+            );
+
+            $("#limit.value").val(
+                $("#limit.value.current").val()
+            );
+        });
+    </script>
+</form>
+
+{{end}}

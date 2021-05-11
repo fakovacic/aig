@@ -1,0 +1,19 @@
+{
+    "url": "http://localhost:3000",
+    "headers": {
+        "Accept": "application/json"
+    },
+    "requests": [
+        {
+            "action": "/register",
+            "method": "POST",
+            "response": {
+                "status": 200
+            },
+            "body":{
+                "id":"first",
+                "ip":"192.168.0.222"
+            }
+        }
+    ]
+}

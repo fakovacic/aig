@@ -1,0 +1,85 @@
+{{define "content"}}
+
+<div class="container mt-2">
+    <div class="card">
+        <div class="card-header">
+            {{template "meta" .Meta}}
+        </div>
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap datatable">
+                <thead>
+                    <tr>
+                        <th>{{i18 "controllers" "id"}}</th>
+                        <th>{{i18 "controllers" "ip"}}</th>
+                        <th>{{i18 "controllers" "temperature"}}</th>
+                        <th>{{i18 "controllers" "humidity"}}</th>
+                        <th>{{i18 "controllers" "heatIndex"}}</th>
+                        <th>{{i18 "controllers" "soil"}}</th>
+                        <th>{{i18 "controllers" "water"}}</th>
+                        <th>{{i18 "controllers" "vent"}}</th>
+                        <th>{{i18 "controllers" "lights"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $key, $value := .Data }}
+                    <tr>
+                        <td>{{ $value.ID }}</td>
+                        <td>{{ $value.IP }}</td>
+                        <td>{{ $value.Temperature }} °C</td>
+                        <td>{{ $value.Humidity }} %</td>
+                        <td>{{ $value.HeatIndex }}</td>
+                        <td>{{ $value.Soil }} %</td>
+                        <td>
+                            {{if $value.Water }}
+
+                            <a href="/controller/{{ $value.ID }}/water/off" class="btn btn-sm btn-danger">
+                                {{i18 "action" "off"}}
+                            </a>
+
+                            {{else}}
+
+                            <a href="/controller/{{ $value.ID }}/water/on" class="btn btn-sm btn-success">
+                                {{i18 "action" "on"}}
+                            </a>
+
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if $value.Vent }}
+
+                            <a href="/controller/{{ $value.ID }}/vent/off" class="btn btn-sm btn-danger">
+                                {{i18 "action" "off"}}
+                            </a>
+
+                            {{else}}
+
+                            <a href="/controller/{{ $value.ID }}/vent/on" class="btn btn-sm btn-success">
+                                {{i18 "action" "on"}}
+                            </a>
+
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if $value.Lights }}
+
+                            <a href="/controller/{{ $value.ID }}/lights/off" class="btn btn-sm btn-danger">
+                                {{i18 "action" "off"}}
+                            </a>
+
+                            {{else}}
+
+                            <a href="/controller/{{ $value.ID }}/lights/on" class="btn btn-sm btn-success">
+                                {{i18 "action" "on"}}
+                            </a>
+
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{end}}

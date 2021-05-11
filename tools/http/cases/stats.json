@@ -1,0 +1,44 @@
+{
+    "url": "http://localhost:3000",
+    "headers": {
+        "Accept": "application/json"
+    },
+    "requests": [
+        {
+            "action": "/stats",
+            "method": "POST",
+            "response": {
+                "status": 200
+            },
+            "body":{
+                "id":"first",
+                "ip":"192.168.0.22",
+                "humidity":49,
+                "temperature":27,
+                "heatIndex":54,
+                "soil":40,
+                "water":false,
+                "lights":false,
+                "vent":false
+            }
+        },
+        {
+            "action": "/stats",
+            "method": "POST",
+            "response": {
+                "status": 200
+            },
+            "body":{
+                "id":"first",
+                "ip":"192.168.0.22",
+                "humidity":49,
+                "temperature":27,
+                "heatIndex":54,
+                "soil":40,
+                "water":false,
+                "lights":true,
+                "vent":false
+            }
+        }
+    ]
+}
