@@ -33,7 +33,7 @@ void setup() {
   Serial.begin(9600);
 
   dht.begin();
-  
+
   pinMode(waterPin, OUTPUT);
   pinMode(ventPin, OUTPUT);
   pinMode(lightsPin, OUTPUT);
@@ -44,7 +44,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  
+
   ip = WiFi.localIP();
   Serial.println("Connected! IP address: ");
   Serial.print(ip);
@@ -138,13 +138,13 @@ void readStats() {
   return;
 }
 
-void readSoil(){
-  soil= analogRead(soilPin);
-  if (soil == 0){
+void readSoil() {
+  soil = analogRead(soilPin);
+  if (soil == 0) {
     Serial.println(F("Failed to read from Soil sensor!"));
     return;
   }
-  soil = map(soil,550,10,0,100);
+  soil = map(soil, 550, 10, 0, 100);
   return;
 }
 
