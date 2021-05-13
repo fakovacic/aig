@@ -87,9 +87,9 @@
                 <ul style="list-style: none;">
 
                     {{ range $k, $v := $value.Config }}
-
+                    
                     <li>When 
-                        <select name="config.[{{ $k }}].stat" class="form-control">
+                        <select data-value="{{ $v.Stat }}" name="config.[{{ $k }}].stat" class="form-control config-select">
                             <option value="temperature">{{i18 "controllers" "temperature"}}</option>
                             <option value="humidity">{{i18 "controllers" "humidity"}}</option>
                             <option value="soil">{{i18 "controllers" "soil"}}</option>
@@ -100,14 +100,14 @@
                         to
                         <input name="config.[{{ $k }}].to" type="text" class="form-control" value="{{ $v.To }}">
 
-                        <select name="config.[{{ $k }}].control" class="form-control">
+                        <select data-value="{{ $v.Control }}" name="config.[{{ $k }}].control" class="form-control config-select">
                             <option value="water">{{i18 "controllers" "water"}}</option>
                             <option value="vent">{{i18 "controllers" "vent"}}</option>
                             <option value="lights">{{i18 "controllers" "lights"}}</option>
                             <option value="heater">{{i18 "controllers" "heater"}}</option>
                         </select>
 
-                        <select name="config.[{{ $k }}].power" class="form-control">
+                        <select  data-value="{{ $v.Power }}" name="config.[{{ $k }}].power" class="form-control config-select">
                             <option value="on">{{i18 "action" "on"}}</option>
                             <option value="off">{{i18 "action" "off"}}</option>
                         </select>
@@ -118,6 +118,7 @@
                     {{ end }}
 
                 </ul>
+
             </div>
             <div class="card-body">
                 <button type="submit" class="btn btn-primary">{{i18 "action" "update"}}</button>
@@ -128,5 +129,14 @@
     </div>
     {{ end }}
 </div>
+
+<script>
+    $( document ).ready(function() {
+        $( ".config-select" ).each(function( index ) {
+            val = $( this ).data("value");
+            $( this ).val(val);
+        });
+    });
+</script>
 
 {{end}}
