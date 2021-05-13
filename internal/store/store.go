@@ -55,7 +55,7 @@ type ModelStore interface {
 	Init(context.Context)
 	Create(context.Context, Model) (Model, error)
 	ReadBy(context.Context, string, interface{}) (Model, error)
-	Update(context.Context, Model, []string) (Model, error)
+	Update(context.Context, Model) (Model, error)
 	Delete(context.Context, Model) error
 	List(context.Context, *meta.Model) ([]json.RawMessage, error)
 	ListByID(context.Context, ...IDf) (map[string]map[string]json.RawMessage, error)

@@ -1,30 +1,32 @@
-autonomous-indoor-greenhouse
+# Autonomous indoor greenhouse
+
+## Components
+ - todo
+## Scheme
+- todo
+## Flow
 
 - controllers connect to wifi
-- send/register ip address to raspberry bi
-- keep track of location of controllers
-- receive stats from controllers
+- send/register ip address to server
+- ping stats from controllers
+- sent commands to controllers
+
+## Features
 
 Dashboard:
 - display all controllers
-- send commands to controllers
+- set config for each controller
 
-Commands:
-- water on/off
-- vent on/off
-- lights on/off
-
-******
 Ping
  - ping controllers for stats
 
 Config - add config field
  - when something will be done
- - depends on stats
+ - depends on stats: temperature, humidity, soil, time
+ - can power: lights, vent, water, heater
 
-Water  from  soil      to soil
-Vent   from: temp      to temp
-Lights from: time.Time to time.Time
+******
+### TODO: 
 
 Track config
  - go proccess to send auto commands to controllers
@@ -32,3 +34,10 @@ Track config
 Camera
 - track camera live
 - make screenshot every hour 
+
+Controllers
+- water pump with relay
+
+- send json object to arduino to setup config power
+- add heater
+- add humidity up & down - water + vent

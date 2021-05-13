@@ -169,7 +169,7 @@ func (ms Store) ReadBy(ctx context.Context, field string, value interface{}) (st
 }
 
 // Update update row in database
-func (ms Store) Update(ctx context.Context, model store.Model, fields []string) (store.Model, error) {
+func (ms Store) Update(ctx context.Context, model store.Model) (store.Model, error) {
 	_, err := ms.store.ES().Update().
 		Index(ms.model.Table()).
 		Id(model.GetID()).

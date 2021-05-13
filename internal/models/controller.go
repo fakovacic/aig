@@ -29,6 +29,7 @@ type Controller struct {
 	Lights      bool      `json:"lights"`
 	Vent        bool      `json:"vent"`
 	Online      bool      `json:"online"`
+	Config      []Config  `json:"config"`
 	Created     time.Time `json:"created"`
 	Modified    time.Time `json:"modified"`
 }
@@ -62,16 +63,28 @@ var ControllerField = struct {
 	Modified:    "modified",
 }
 
-// ControllerAllFields contain all fields
-var ControllerAllFields = []string{
-	ControllerField.IP,
-	ControllerField.Humidity,
-	ControllerField.Temperature,
-	ControllerField.HeatIndex,
-	ControllerField.Soil,
-	ControllerField.Water,
-	ControllerField.Lights,
-	ControllerField.Vent,
+// Config controller struct
+type Config struct {
+	Stat    string `json:"stat"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Control string `json:"control"`
+	Power   string `json:"power"`
+}
+
+// ControllerConfigField fields
+var ControllerConfigField = struct {
+	Stat    string
+	From    string
+	To      string
+	Control string
+	Power   string
+}{
+	Stat:    "stat",
+	From:    "from",
+	To:      "to",
+	Control: "control",
+	Power:   "power",
 }
 
 // ControllerSortFields sort fields
@@ -165,6 +178,12 @@ func (d *Controller) BDelete() error {
 // ADelete implement model after delete method
 func (d *Controller) ADelete() error {
 	return nil
+}
+
+// RemoveConfig remove config key
+func (d *Controller) RemoveConfig(i int) {
+	d.Config[i] = d.Config[len(d.Config)-1]
+	d.Config = d.Config[:len(d.Config)-1]
 }
 
 // ToStats adapter to stats

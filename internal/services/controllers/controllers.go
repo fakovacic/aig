@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/fakovacic/aig/internal/errors"
 	"github.com/fakovacic/aig/internal/meta"
@@ -30,29 +31,88 @@ type Service struct {
 	us *wrapper.Store
 }
 
+// ParseFormRequest parse http request
+func (s *Service) ParseFormRequest(r *http.Request, par httprouter.Params) (*models.Controller, error) {
+	var err error
+	var remove string
+	u := &models.Controller{}
+
+	if par != nil {
+		id := par.ByName("id")
+		remove = par.ByName("config")
+
+		if id != "" {
+			u, err = s.Read(r.Context(), "id", id)
+			if err != nil {
+				return nil, errors.BadRequestWrap(err, "read controller by id %s", id)
+			}
+		}
+	}
+
+	fields := []string{
+		models.ControllerConfigField.Stat,
+		models.ControllerConfigField.From,
+		models.ControllerConfigField.To,
+		models.ControllerConfigField.Control,
+		models.ControllerConfigField.Power,
+	}
+
+	if len(u.Config) != 0 {
+		for ck, c := range u.Config {
+			for i := range fields {
+				fk := fmt.Sprintf("config.[%d].%s", ck, fields[i])
+				val := r.FormValue(fk)
+				switch fields[i] {
+				case models.ControllerConfigField.Stat:
+					c.Stat = val
+				case models.ControllerConfigField.From:
+					c.From = val
+				case models.ControllerConfigField.To:
+					c.To = val
+				case models.ControllerConfigField.Control:
+					c.Control = val
+				case models.ControllerConfigField.Power:
+					c.Power = val
+				}
+			}
+			u.Config[ck] = c
+		}
+	}
+
+	if remove != "" {
+		k, _ := strconv.Atoi(remove)
+		u.RemoveConfig(k)
+	}
+
+	return u, nil
+}
+
 // ParseBodyRequest parse http request
-func (s *Service) ParseBodyRequest(r *http.Request, par httprouter.Params) (*models.Controller, []string, error) {
-	u := models.Controller{}
+func (s *Service) ParseBodyRequest(r *http.Request, par httprouter.Params) (*models.Controller, error) {
+	var err error
+	u := &models.Controller{}
 
 	if par != nil {
 		id := par.ByName("id")
 		if id != "" {
-			u.ID = id
+			u, err = s.Read(r.Context(), "id", id)
+			if err != nil {
+				return nil, errors.BadRequestWrap(err, "read controller by id %s", id)
+			}
 		}
 	}
 
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var reqBody map[string]interface{}
 	err = json.Unmarshal(b, &reqBody)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	var updatedFields []string
 	fields := []string{
 		models.ControllerField.ID,
 		models.ControllerField.IP,
@@ -77,35 +137,26 @@ func (s *Service) ParseBodyRequest(r *http.Request, par httprouter.Params) (*mod
 			u.ID = val.(string)
 		case models.ControllerField.IP:
 			u.IP = val.(string)
-			updatedFields = append(updatedFields, models.ControllerField.IP)
 		case models.ControllerField.Humidity:
 			u.Humidity = val.(float64)
-			updatedFields = append(updatedFields, models.ControllerField.Humidity)
 		case models.ControllerField.Temperature:
 			u.Temperature = val.(float64)
-			updatedFields = append(updatedFields, models.ControllerField.Temperature)
 		case models.ControllerField.HeatIndex:
 			u.HeatIndex = val.(float64)
-			updatedFields = append(updatedFields, models.ControllerField.HeatIndex)
 		case models.ControllerField.Soil:
 			u.Soil = val.(float64)
-			updatedFields = append(updatedFields, models.ControllerField.Soil)
 		case models.ControllerField.Water:
 			u.Water = val.(bool)
-			updatedFields = append(updatedFields, models.ControllerField.Water)
 		case models.ControllerField.Lights:
 			u.Lights = val.(bool)
-			updatedFields = append(updatedFields, models.ControllerField.Lights)
 		case models.ControllerField.Vent:
 			u.Vent = val.(bool)
-			updatedFields = append(updatedFields, models.ControllerField.Vent)
 		case models.ControllerField.Online:
 			u.Online = val.(bool)
-			updatedFields = append(updatedFields, models.ControllerField.Online)
 		}
 	}
 
-	return &u, updatedFields, nil
+	return u, nil
 }
 
 // ControllerCommand read action
@@ -180,11 +231,8 @@ func (s *Service) Create(ctx context.Context, m *models.Controller) (*models.Con
 }
 
 // Update update action
-func (s *Service) Update(ctx context.Context, m *models.Controller, fields []string) (*models.Controller, error) {
-	if len(fields) == 0 {
-		return m, nil
-	}
-	model, err := s.us.Update(ctx, m, fields)
+func (s *Service) Update(ctx context.Context, m *models.Controller) (*models.Controller, error) {
+	model, err := s.us.Update(ctx, m)
 	if err != nil {
 		return nil, err
 	}

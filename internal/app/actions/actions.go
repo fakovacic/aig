@@ -11,6 +11,12 @@ const (
 	// Register const
 	Register actions.Action = "register"
 
-	// ControllerCommand const
-	ControllerCommand actions.Action = "controller-command"
+	// Controller const
+	Controller actions.Action = "controller"
+
+	// ControllerConfigAdd const
+	ControllerConfigAdd actions.Action = "controller-config-add"
+
+	// ControllerConfigRemove const
+	ControllerConfigRemove actions.Action = "controller-config-remove"
 )

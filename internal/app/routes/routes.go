@@ -50,10 +50,22 @@ func Routes(cfg config.Config) map[routes.Endpoint]map[routes.Method]routes.Rout
 				Handler: handlers.Handle(nil, h, actions.Register),
 			},
 		},
-		endpoints.ControllerCommand: {
+		endpoints.Controller: {
+			methods.Post: routes.Route{
+				Config:  cfg,
+				Handler: handlers.Handle(nil, h, actions.Controller),
+			},
+		},
+		endpoints.ControllerConfigAdd: {
 			methods.Get: routes.Route{
 				Config:  cfg,
-				Handler: handlers.Handle(nil, h, actions.ControllerCommand),
+				Handler: handlers.Handle(nil, h, actions.ControllerConfigAdd),
+			},
+		},
+		endpoints.ControllerConfigRemove: {
+			methods.Get: routes.Route{
+				Config:  cfg,
+				Handler: handlers.Handle(nil, h, actions.ControllerConfigRemove),
 			},
 		},
 	}

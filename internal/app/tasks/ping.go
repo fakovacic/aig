@@ -8,7 +8,6 @@ import (
 	"github.com/fakovacic/aig/internal/app/config"
 	"github.com/fakovacic/aig/internal/log"
 	"github.com/fakovacic/aig/internal/meta"
-	"github.com/fakovacic/aig/internal/models"
 	"github.com/fakovacic/aig/internal/services/controllers"
 	"github.com/fakovacic/aig/internal/services/stats"
 )
@@ -52,7 +51,7 @@ func Ping(cfg config.Config) {
 				}
 
 				ctx = context.WithValue(ctx, "external_id", model.ID)
-				_, err = pt.cs.Update(ctx, model, models.ControllerAllFields)
+				_, err = pt.cs.Update(ctx, model)
 				if err != nil {
 					log.Error("update controller error", err)
 					continue

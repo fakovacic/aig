@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/fakovacic/aig/internal/app/actions"
@@ -70,10 +71,38 @@ func (m Handler) Action(r *http.Request, par httprouter.Params, action handlers.
 	switch action {
 	case actions.Dashoard:
 		return m.Dashoard(ctx, metaModel)
-	case actions.ControllerCommand:
-		return m.ControllerCommand(ctx, par)
+	case actions.Controller:
+		model, err := m.cs.ParseFormRequest(r, par)
+		if err != nil {
+			return &response.Response{
+				Data:        err,
+				ContentType: content.HTML,
+			}, err
+		}
+
+		return m.Controller(ctx, model)
+	case actions.ControllerConfigAdd:
+		model, err := m.cs.ParseFormRequest(r, par)
+		if err != nil {
+			return &response.Response{
+				Data:        err,
+				ContentType: content.HTML,
+			}, err
+		}
+
+		return m.ControllerConfigAdd(ctx, model)
+	case actions.ControllerConfigRemove:
+		model, err := m.cs.ParseFormRequest(r, par)
+		if err != nil {
+			return &response.Response{
+				Data:        err,
+				ContentType: content.HTML,
+			}, err
+		}
+
+		return m.ControllerConfigRemove(ctx, model)
 	case actions.Register:
-		model, fields, err := m.cs.ParseBodyRequest(r, par)
+		model, err := m.cs.ParseBodyRequest(r, par)
 		if err != nil {
 			return &response.Response{
 				Data:        err,
@@ -81,7 +110,7 @@ func (m Handler) Action(r *http.Request, par httprouter.Params, action handlers.
 			}, err
 		}
 
-		return m.Register(ctx, model, fields)
+		return m.Register(ctx, model)
 	default:
 		m.cfg.AddNotification("error", "not implemented action")
 		return &response.Response{
@@ -119,65 +148,62 @@ func (m *Handler) Dashoard(ctx context.Context, metaModel *meta.Model) (res *res
 	}, nil
 }
 
-// ControllerCommand action
-func (m *Handler) ControllerCommand(ctx context.Context, par httprouter.Params) (res *response.Response, err error) {
-	if par.ByName("id") == "" {
-		m.cfg.AddNotification("error", "id empty")
-		return &response.Response{
-			Redirect:    endpoints.Dashoard,
-			ContentType: content.HTML,
-		}, nil
-	}
-
-	if par.ByName("command") == "" {
-		m.cfg.AddNotification("error", "command empty")
-		return &response.Response{
-			Redirect:    endpoints.Dashoard,
-			ContentType: content.HTML,
-		}, nil
-	}
-
-	if par.ByName("power") == "" {
-		m.cfg.AddNotification("error", "power empty")
-		return &response.Response{
-			Redirect:    endpoints.Dashoard,
-			ContentType: content.HTML,
-		}, nil
-	}
-
-	id := par.ByName("id")
-	command := par.ByName("command")
-	power := par.ByName("power")
-
-	model, err := m.cs.ControllerCommand(ctx, id, command, power)
-	if err != nil {
-		m.cfg.AddNotification("error", err.Error())
-		return &response.Response{
-			Redirect:    endpoints.Dashoard,
-			ContentType: content.HTML,
-		}, nil
-	}
-
-	_, err = m.ss.Create(ctx, model.ToStats())
-	if err != nil {
-		m.cfg.AddNotification("error", "Error while creating stats:%v", err)
-		return &response.Response{
-			Redirect:    baseRedirect,
-			ContentType: content.HTML,
-		}, nil
-	}
-
+// Controller action
+func (m *Handler) Controller(ctx context.Context, model *models.Controller) (res *response.Response, err error) {
 	ctx = context.WithValue(ctx, "external_id", model.ID)
-	_, err = m.cs.Update(ctx, model, models.ControllerAllFields)
+	_, err = m.cs.Update(ctx, model)
 	if err != nil {
+		m.cfg.AddNotification("error", fmt.Sprintf("update error:%v", err))
 		return &response.Response{
-			Data:        err,
-			ContentType: content.JSON,
+			Redirect:    endpoints.Dashoard,
+			ContentType: content.HTML,
 		}, nil
 	}
 
 	m.aa.Create(ctx)
-	m.cfg.AddNotification("success", "%s %s %s", id, command, power)
+	m.cfg.AddNotification("success", "config changed")
+	return &response.Response{
+		Redirect:    endpoints.Dashoard,
+		ContentType: content.HTML,
+	}, nil
+}
+
+// ControllerConfigAdd action
+func (m *Handler) ControllerConfigAdd(ctx context.Context, model *models.Controller) (res *response.Response, err error) {
+	ctx = context.WithValue(ctx, "external_id", model.ID)
+
+	model.Config = append(model.Config, models.Config{})
+	_, err = m.cs.Update(ctx, model)
+	if err != nil {
+		m.cfg.AddNotification("error", fmt.Sprintf("update error:%v", err))
+		return &response.Response{
+			Redirect:    endpoints.Dashoard,
+			ContentType: content.HTML,
+		}, nil
+	}
+
+	m.aa.Create(ctx)
+	m.cfg.AddNotification("success", "add controller config")
+	return &response.Response{
+		Redirect:    endpoints.Dashoard,
+		ContentType: content.HTML,
+	}, nil
+}
+
+// ControllerConfigRemove action
+func (m *Handler) ControllerConfigRemove(ctx context.Context, model *models.Controller) (res *response.Response, err error) {
+	ctx = context.WithValue(ctx, "external_id", model.ID)
+	_, err = m.cs.Update(ctx, model)
+	if err != nil {
+		m.cfg.AddNotification("error", fmt.Sprintf("update error:%v", err))
+		return &response.Response{
+			Redirect:    endpoints.Dashoard,
+			ContentType: content.HTML,
+		}, nil
+	}
+
+	m.aa.Create(ctx)
+	m.cfg.AddNotification("success", "remove controller config")
 	return &response.Response{
 		Redirect:    endpoints.Dashoard,
 		ContentType: content.HTML,
@@ -185,7 +211,7 @@ func (m *Handler) ControllerCommand(ctx context.Context, par httprouter.Params) 
 }
 
 // Register action
-func (m *Handler) Register(ctx context.Context, model *models.Controller, fields []string) (res *response.Response, err error) {
+func (m *Handler) Register(ctx context.Context, model *models.Controller) (res *response.Response, err error) {
 	ctx = context.WithValue(ctx, "external_id", model.ID)
 	m.aa.Create(ctx)
 
@@ -221,7 +247,7 @@ func (m *Handler) Register(ctx context.Context, model *models.Controller, fields
 	}
 
 	// update
-	model, err = m.cs.Update(ctx, model, fields)
+	model, err = m.cs.Update(ctx, model)
 	if err != nil {
 		return &response.Response{
 			Data:        err,

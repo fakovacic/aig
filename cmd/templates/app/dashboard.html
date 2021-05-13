@@ -1,19 +1,21 @@
 {{define "content"}}
 
 <div class="container mt-2">
-    <div class="card">
+    <div class="card-body">
+        {{template "meta" .Meta}}
+    </div>
+
+    {{ range $key, $value := .Data }}
+    <div class="card mt-4">
         <div class="card-header">
-            {{template "meta" .Meta}}
+            {{ $value.ID }} : {{ $value.IP }}
         </div>
         <div class="table-responsive">
-            <table class="table card-table table-vcenter text-nowrap datatable">
+            <table class="table card-table table-vcenter text-nowrap">
                 <thead>
                     <tr>
-                        <th>{{i18 "controllers" "id"}}</th>
-                        <th>{{i18 "controllers" "ip"}}</th>
                         <th>{{i18 "controllers" "temperature"}}</th>
                         <th>{{i18 "controllers" "humidity"}}</th>
-                        <th>{{i18 "controllers" "heatIndex"}}</th>
                         <th>{{i18 "controllers" "soil"}}</th>
                         <th>{{i18 "controllers" "water"}}</th>
                         <th>{{i18 "controllers" "vent"}}</th>
@@ -21,65 +23,110 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{ range $key, $value := .Data }}
                     <tr>
-                        <td>{{ $value.ID }}</td>
-                        <td>{{ $value.IP }}</td>
                         <td>{{ $value.Temperature }} °C</td>
                         <td>{{ $value.Humidity }} %</td>
-                        <td>{{ $value.HeatIndex }}</td>
                         <td>{{ $value.Soil }} %</td>
                         <td>
                             {{if $value.Water }}
 
-                            <a href="/controller/{{ $value.ID }}/water/off" class="btn btn-sm btn-danger">
-                                {{i18 "action" "off"}}
-                            </a>
+                            <h5 class="text-success">
+                                {{i18 "action" "on"}}
+                            </h5>
 
                             {{else}}
 
-                            <a href="/controller/{{ $value.ID }}/water/on" class="btn btn-sm btn-success">
-                                {{i18 "action" "on"}}
-                            </a>
+                            <h5 class="text-danger">
+                                {{i18 "action" "off"}}
+                            </h5>
 
                             {{end}}
                         </td>
                         <td>
                             {{if $value.Vent }}
 
-                            <a href="/controller/{{ $value.ID }}/vent/off" class="btn btn-sm btn-danger">
-                                {{i18 "action" "off"}}
-                            </a>
+                            <h5 class="text-success">
+                                {{i18 "action" "on"}}
+                            </h5>
 
                             {{else}}
 
-                            <a href="/controller/{{ $value.ID }}/vent/on" class="btn btn-sm btn-success">
-                                {{i18 "action" "on"}}
-                            </a>
+                            <h5 class="text-danger">
+                                {{i18 "action" "off"}}
+                            </h5>
 
                             {{end}}
                         </td>
                         <td>
                             {{if $value.Lights }}
 
-                            <a href="/controller/{{ $value.ID }}/lights/off" class="btn btn-sm btn-danger">
-                                {{i18 "action" "off"}}
-                            </a>
+                            <h5 class="text-success">
+                                {{i18 "action" "on"}}
+                            </h5>
 
                             {{else}}
 
-                            <a href="/controller/{{ $value.ID }}/lights/on" class="btn btn-sm btn-success">
-                                {{i18 "action" "on"}}
-                            </a>
+                            <h5 class="text-danger">
+                                {{i18 "action" "off"}}
+                            </h5>
 
                             {{end}}
                         </td>
                     </tr>
-                    {{ end }}
                 </tbody>
             </table>
         </div>
+        <div class="card-header">
+            <h5>Config <a href="/controller/{{ $value.ID }}/config/add" class="btn btn-sm btn-success">+</a></h5>
+        </div>
+
+        {{if $value.Config }}
+
+        <form method="POST" action="/controller/{{ $value.ID }}" class="form-inline text-right">
+            <div class="card-body">
+                <ul style="list-style: none;">
+
+                    {{ range $k, $v := $value.Config }}
+
+                    <li>When 
+                        <select name="config.[{{ $k }}].stat" class="form-control">
+                            <option value="temperature">{{i18 "controllers" "temperature"}}</option>
+                            <option value="humidity">{{i18 "controllers" "humidity"}}</option>
+                            <option value="soil">{{i18 "controllers" "soil"}}</option>
+                            <option value="time">{{i18 "controllers" "time"}}</option>
+                        </select>
+                        from
+                        <input name="config.[{{ $k }}].from" type="text" class="form-control"  value="{{ $v.From }}">
+                        to
+                        <input name="config.[{{ $k }}].to" type="text" class="form-control" value="{{ $v.To }}">
+
+                        <select name="config.[{{ $k }}].control" class="form-control">
+                            <option value="water">{{i18 "controllers" "water"}}</option>
+                            <option value="vent">{{i18 "controllers" "vent"}}</option>
+                            <option value="lights">{{i18 "controllers" "lights"}}</option>
+                            <option value="heater">{{i18 "controllers" "heater"}}</option>
+                        </select>
+
+                        <select name="config.[{{ $k }}].power" class="form-control">
+                            <option value="on">{{i18 "action" "on"}}</option>
+                            <option value="off">{{i18 "action" "off"}}</option>
+                        </select>
+
+                        <a href="/controller/{{ $value.ID }}/config/remove/{{ $k }}" class="btn btn-sm btn-danger">x</a>
+                    </li>
+
+                    {{ end }}
+
+                </ul>
+            </div>
+            <div class="card-body">
+                <button type="submit" class="btn btn-primary">{{i18 "action" "update"}}</button>
+            </div>
+        </form>
+
+        {{end}}
     </div>
+    {{ end }}
 </div>
 
 {{end}}
