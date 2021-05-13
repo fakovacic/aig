@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/fakovacic/aig/internal/errors"
@@ -186,6 +187,16 @@ func (d *Controller) RemoveConfig(i int) {
 	d.Config = d.Config[:len(d.Config)-1]
 }
 
+// ConfigPower return bool power
+func (d *Controller) ConfigPower(s string) bool {
+	return s == "on"
+}
+
+// ConfigPowerOp return oposite bool power
+func (d *Controller) ConfigPowerOp(s string) bool {
+	return s != "on"
+}
+
 // ToStats adapter to stats
 func (d *Controller) ToStats() *Stats {
 	return &Stats{
@@ -199,6 +210,72 @@ func (d *Controller) ToStats() *Stats {
 		Lights:      d.Lights,
 		Vent:        d.Vent,
 	}
+}
+
+// ValidCommands return command that need to execute
+func (d *Controller) ValidCommands() map[string]string {
+	m := make(map[string]string)
+
+	if len(d.Config) == 0 {
+		return m
+	}
+
+	for i := range d.Config {
+		power := d.ConfigPowerOp(d.Config[i].Power)
+		switch d.Config[i].Stat {
+		case "time":
+			now := time.Now()
+			from, _ := time.Parse("15:04:05", d.Config[i].From)
+			to, _ := time.Parse("15:04:05", d.Config[i].To)
+
+			if from.After(now) && to.Before(now) {
+				power = d.ConfigPower(d.Config[i].Power)
+			}
+
+		case "temperature":
+			from, _ := strconv.ParseFloat(d.Config[i].From, 64)
+			to, _ := strconv.ParseFloat(d.Config[i].To, 64)
+
+			if d.Temperature > from && d.Temperature < to {
+				power = d.ConfigPower(d.Config[i].Power)
+			}
+		case "humidity":
+			from, _ := strconv.ParseFloat(d.Config[i].From, 64)
+			to, _ := strconv.ParseFloat(d.Config[i].To, 64)
+
+			if d.Humidity > from && d.Humidity < to {
+				power = d.ConfigPower(d.Config[i].Power)
+			}
+		case "soil":
+			from, _ := strconv.ParseFloat(d.Config[i].From, 64)
+			to, _ := strconv.ParseFloat(d.Config[i].To, 64)
+
+			if d.Soil > from && d.Soil < to {
+				power = d.ConfigPower(d.Config[i].Power)
+			}
+		}
+
+		switch d.Config[i].Control {
+		case "water":
+			if d.Water != power {
+				m[d.Config[i].Control] = d.Config[i].Power
+			}
+		case "vent":
+			if d.Vent != power {
+				m[d.Config[i].Control] = d.Config[i].Power
+			}
+		case "lights":
+			if d.Lights != power {
+				m[d.Config[i].Control] = d.Config[i].Power
+			}
+			// case "heater":
+			// 	if d.Heater != power {
+			// 		m[d.Config[i].Control] = d.Config[i].Power
+			// 	}
+		}
+	}
+
+	return m
 }
 
 // RawController unmarshal raw message

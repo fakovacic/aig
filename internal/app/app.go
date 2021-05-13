@@ -90,4 +90,5 @@ func (c *Config) Routes(router *apmhttprouter.Router) {
 // BackgroundTasks start tasks
 func (c *Config) BackgroundTasks() {
 	tasks.Ping(c)
+	tasks.Config(c)
 }

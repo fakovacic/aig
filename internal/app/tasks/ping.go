@@ -12,7 +12,7 @@ import (
 	"github.com/fakovacic/aig/internal/services/stats"
 )
 
-// Ping return new pinger
+// Ping start ping task
 func Ping(cfg config.Config) {
 	pt := PingTask{
 		cs:  controllers.New(cfg.Store()),
